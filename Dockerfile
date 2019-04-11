@@ -1,5 +1,6 @@
 FROM php:7.2-apache
-MAINTAINER Pierre Cheynier <pierre.cheynier@gmail.com>
+
+LABEL maintainer 'Sam Burney <sam@burney.io>'
 
 ENV PHPIPAM_SOURCE https://github.com/phpipam/phpipam/
 ENV PHPIPAM_VERSION 1.3.2
@@ -13,7 +14,7 @@ ENV WEB_REPO /var/www/html
 RUN sed -i /etc/apt/sources.list -e 's/$/ non-free'/ && \
     apt-get update && apt-get -y upgrade && \
     rm /etc/apt/preferences.d/no-debian-php && \
-    apt-get install -y libcurl4-gnutls-dev libgmp-dev libmcrypt-dev libfreetype6-dev libjpeg-dev libpng-dev libldap2-dev libsnmp-dev snmp-mibs-downloader iputils-ping && \
+    apt-get install -y libcurl4-gnutls-dev libgmp-dev libmcrypt-dev libfreetype6-dev libjpeg-dev libpng-dev libldap2-dev libsnmp-dev snmp-mibs-downloader iputils-ping git && \
     rm -rf /var/lib/apt/lists/*
 
 # Install required packages and files required for snmp
@@ -47,9 +48,11 @@ RUN docker-php-ext-configure mysqli --with-mysqli=mysqlnd && \
 
 COPY php.ini /usr/local/etc/php/
 
-# Copy phpipam sources to web dir
-ADD ${PHPIPAM_SOURCE}/archive/${PHPIPAM_VERSION}.tar.gz /tmp/
-RUN tar -xzf /tmp/${PHPIPAM_VERSION}.tar.gz -C ${WEB_REPO}/ --strip-components=1
+# Clone PHPIPAM sources from git
+RUN git clone https://github.com/samburney/phpipam.git ${WEB_REPO} \
+    && cd ${WEB_REPO} \
+    && git checkout -b 1.3.2-patched
+
 # Copy referenced submodules into the right directory
 ADD ${PHPMAILER_SOURCE}/archive/v${PHPMAILER_VERSION}.tar.gz /tmp/
 RUN tar -xzf /tmp/v${PHPMAILER_VERSION}.tar.gz -C ${WEB_REPO}/functions/PHPMailer/ --strip-components=1
