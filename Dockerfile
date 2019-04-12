@@ -51,7 +51,7 @@ COPY php.ini /usr/local/etc/php/
 # Clone PHPIPAM sources from git
 RUN git clone https://github.com/samburney/phpipam.git ${WEB_REPO} \
     && cd ${WEB_REPO} \
-    && git checkout -b 1.3.2-patched
+    && git checkout 1.3.2-patched
 
 # Copy referenced submodules into the right directory
 ADD ${PHPMAILER_SOURCE}/archive/v${PHPMAILER_VERSION}.tar.gz /tmp/
